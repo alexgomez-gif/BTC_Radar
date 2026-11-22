@@ -27,7 +27,7 @@ The project:
 - [x] **0. Setup** — repository structure, virtual environment, CI
 - [x] **1. Data** — download BTCUSDT candles (1d, 4h) to Parquet
 - [x] **2. Exploration** — returns, volatility, volume, first candlestick chart
-- [ ] **3. Volume profile** — POC, VAH, VAL
+- [x] **3. Volume profile** — POC, VAH, VAL
 - [ ] **4. Whales** — large trades, buy/sell aggressor, CVD
 - [ ] **5. Wyckoff v1** — rule-based range and event detection
 - [ ] **6. Signals + backtest** — entries, stops, targets and metrics
@@ -109,6 +109,18 @@ Data is not versioned; scripts in `src/btc_radar/` regenerate it.
 Takeaway: risk must be measured on real (fat-tailed) data, and order flow is
 descriptive rather than predictive on its own — it will be used within the
 Wyckoff context.
+
+### Volume profile — [`notebooks/02_perfil_volumen.ipynb`](notebooks/02_perfil_volumen.ipynb)
+
+| Finding | Value |
+|---|---|
+| Last 180 days (4h) | POC ≈ 64,000 (Jun–Aug range); value area 57.4k–78.4k; low-volume node ≈ 70k |
+| Delta by level | Aggressive selling dominated around the POC (60–66k), aggressive buying at 72–79k |
+| Measurement unit | Long-horizon profiles must use USD volume; BTC volume over-weights cheap years |
+| "POC as magnet" test | Price revisits the prior POC as often as an equal-distance control level (weekly 72.7% vs 72.7%; monthly p = 0.77) — no magnet effect |
+
+Takeaway: volume levels are used as context; whether they act as support or
+resistance is left to the backtest rather than assumed.
 
 ## Resumen en español
 
