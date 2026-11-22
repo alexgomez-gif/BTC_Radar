@@ -6,6 +6,7 @@ from btc_radar.ballenas import (
     cvd,
     delta_usd,
     detectar_ballenas,
+    flujo_por_periodo,
     flujo_por_tamano,
     velas_desde_trades,
 )
@@ -92,3 +93,21 @@ def test_velas_desde_trades(trades):
     assert primera["volume"] == 9.0
     assert primera["taker_buy_volume"] == 4.0
     assert len(velas) == 2
+
+
+def test_flujo_por_periodo_separa_semanas_y_tamanos():
+    lunes = pd.Timestamp("2026-01-05", tz="UTC")
+    ordenes = pd.DataFrame(
+        {
+            "time": [lunes, lunes, lunes + pd.Timedelta("7D")],
+            "usd": [100.0, 2e6, 300.0],
+            "compra_agresiva": [True, False, False],
+        }
+    )
+    tabla = flujo_por_periodo(ordenes, frecuencia="W")
+
+    assert len(tabla) == 2
+    assert tabla.iloc[0]["<10k"] == pytest.approx(1.0)  # semana 1: minoristas compran
+    assert tabla.iloc[0][">1M"] == pytest.approx(-1.0)  # ballenas venden
+    assert tabla.iloc[1]["<10k"] == pytest.approx(-1.0)  # semana 2: minoristas venden
+    assert pd.isna(tabla.iloc[1][">1M"])  # sin ballenas esa semana

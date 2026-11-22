@@ -81,7 +81,7 @@ Download tick data (aggregated trades) for the last N full days to
 `data/raw/aggTrades/` (~20 MB per day, verified against Binance's SHA-256):
 
 ```bash
-btc-trades --dias 7
+btc-trades --dias 30
 ```
 
 ## Code quality
@@ -131,18 +131,21 @@ resistance is left to the backtest rather than assumed.
 
 ### Whales & order flow — [`notebooks/03_ballenas.ipynb`](notebooks/03_ballenas.ipynb)
 
-7 days of tick data (15–21 Nov 2026): 9.9M aggregated trades, SHA-256 verified,
-no missing IDs and an exact match with candle volume.
+30 days of tick data (23 Oct – 21 Nov 2026): 31.3M aggregated trades, SHA-256
+verified, no missing IDs and an exact match with candle volume.
 
 | Finding | Value |
 |---|---|
-| Trades → orders | Re-joining aggTrades that share timestamp and side: 9.9M → 5.1M orders; largest order 6.8M USD sweeping 370 price levels |
-| Concentration | Top 0.1% of orders = 18% of USD volume; top 1% = 45% |
-| Flow by size (price −6%, low 55.1k) | Orders < 1k USD net **sold** (−23% of their volume); orders > 1M USD net **bought** (+7%) — absorption |
-| Predictive power | Whale delta tracks the same-hour return (ρ = 0.31) but not the next hour (ρ = −0.03, p = 0.72) |
+| Trades → orders | Re-joining aggTrades that share timestamp and side: 31.3M → 17.5M orders; largest order 8.2M USD sweeping 1,081 price levels |
+| Concentration | Top 0.1% of orders = 20% of USD volume; top 1% = 46% |
+| Month (price −26%) | Orders > 1M USD were net **sellers** (−6.3% of their volume); orders < 1k USD slight net buyers (+2.1%) |
+| Week by week | 3 weeks of whales selling (−14% to −19%) while retail bought (+2% to +7%); in the final crash week roles flipped: retail −11%, whales +5.5% |
+| Predictive power (719 h) | Whale delta tracks the same-hour return (ρ = 0.32) but not the next hour (ρ ≈ 0, p = 0.74); a weak retail effect seen with 7 days disappears with 30 |
 
-Takeaway: big money absorbed retail selling during the drop, but following
-whale flow alone gives no obvious 1-hour edge.
+Takeaway: the flow pattern reads like Wyckoff distribution → markdown →
+absorption, but whale flow gives no 1-hour edge — its value is as multi-day
+context. Extending from 7 to 30 days reversed the first-week conclusion,
+a reminder of how misleading small samples are.
 
 ## Resumen en español
 

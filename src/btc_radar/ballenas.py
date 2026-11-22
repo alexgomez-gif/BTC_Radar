@@ -91,6 +91,38 @@ def flujo_por_tamano(
     return tabla
 
 
+def flujo_por_periodo(
+    ordenes: pd.DataFrame,
+    frecuencia: str = "W",
+    cortes: tuple[float, ...] = (0, 1e4, 1e6, np.inf),
+    etiquetas: tuple[str, ...] = ("<10k", "10k-1M", ">1M"),
+) -> pd.DataFrame:
+    """Delta sobre volumen (tanto por uno) por periodo y por tamaño de orden.
+
+    Permite ver si los grupos cambian de comportamiento con el tiempo, p. ej.
+    ballenas vendiendo mientras los minoristas compran.
+    """
+    datos = pd.DataFrame(
+        {
+            "periodo": ordenes["time"].dt.tz_localize(None).dt.to_period(frecuencia),
+            "tamano": pd.cut(
+                ordenes["usd"], list(cortes), labels=list(etiquetas), right=False
+            ),
+            "delta": delta_usd(ordenes),
+            "usd": ordenes["usd"],
+        }
+    )
+    suma = datos.pivot_table(
+        index="periodo",
+        columns="tamano",
+        values=["delta", "usd"],
+        aggfunc="sum",
+        observed=False,
+        fill_value=0,
+    )
+    return suma["delta"] / suma["usd"].replace(0, np.nan)
+
+
 def cvd(ordenes: pd.DataFrame, frecuencia: str = "1h") -> pd.Series:
     """Cumulative Volume Delta en USD, muestreado cada `frecuencia`."""
     delta = delta_usd(ordenes).set_axis(ordenes["time"])

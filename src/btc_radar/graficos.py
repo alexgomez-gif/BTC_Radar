@@ -150,11 +150,14 @@ def grafico_ballenas(
     ballenas: pd.DataFrame,
     cvds: dict[str, pd.Series],
     titulo: str = "BTCUSDT · órdenes de ballenas",
+    tamano_max: float = 40,
 ) -> go.Figure:
     """Velas con burbujas de ballenas arriba y curvas de CVD abajo.
 
     Burbujas: área proporcional al importe en USD; verde = compra agresiva,
     roja = venta agresiva. `cvds` mapea un nombre (p. ej. "Ballenas") a su CVD.
+    `tamano_max` es el diámetro (px) de la mayor burbuja: conviene reducirlo
+    cuando hay cientos de órdenes para que no tapen las velas.
     """
     fig = make_subplots(
         rows=2,
@@ -164,10 +167,9 @@ def grafico_ballenas(
         vertical_spacing=0.03,
     )
     velas_traza, _ = _trazas_velas(velas)
-    velas_traza.update(opacity=0.6)
     fig.add_trace(velas_traza, row=1, col=1)
 
-    tamano = 40 * np.sqrt(ballenas["usd"] / ballenas["usd"].max())
+    tamano = tamano_max * np.sqrt(ballenas["usd"] / ballenas["usd"].max())
     for compra, color, nombre in [(True, VERDE, "Compra"), (False, ROJO, "Venta")]:
         lado = ballenas[ballenas["compra_agresiva"] == compra]
         fig.add_trace(
@@ -178,7 +180,7 @@ def grafico_ballenas(
                 marker={
                     "size": tamano[lado.index],
                     "color": color,
-                    "opacity": 0.6,
+                    "opacity": 0.45,
                     "line": {"width": 0.5, "color": "white"},
                 },
                 name=f"Ballena · {nombre}",
