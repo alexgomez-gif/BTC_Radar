@@ -28,7 +28,7 @@ The project:
 - [x] **1. Data** — download BTCUSDT candles (1d, 4h) to Parquet
 - [x] **2. Exploration** — returns, volatility, volume, first candlestick chart
 - [x] **3. Volume profile** — POC, VAH, VAL
-- [ ] **4. Whales** — large trades, buy/sell aggressor, CVD
+- [x] **4. Whales** — large trades, buy/sell aggressor, CVD
 - [ ] **5. Wyckoff v1** — rule-based range and event detection
 - [ ] **6. Signals + backtest** — entries, stops, targets and metrics
 - [ ] **7. Dashboard** — Streamlit app
@@ -77,6 +77,13 @@ df = pd.read_parquet("data/raw/BTCUSDT_1d.parquet")
 
 Only closed candles are stored; the in-progress candle is dropped.
 
+Download tick data (aggregated trades) for the last N full days to
+`data/raw/aggTrades/` (~20 MB per day, verified against Binance's SHA-256):
+
+```bash
+btc-trades --dias 7
+```
+
 ## Code quality
 
 ```bash
@@ -90,7 +97,7 @@ pytest           # tests
 | Source | Description | Location | Refresh |
 |--------|-------------|----------|---------|
 | Binance `GET /api/v3/klines` | BTCUSDT OHLCV candles | `data/raw/` | On demand |
-| Binance `GET /api/v3/aggTrades` | Aggregated trades with aggressor side | `data/raw/` | On demand |
+| [data.binance.vision](https://data.binance.vision) daily `aggTrades` | Aggregated trades with aggressor side | `data/raw/aggTrades/` | On demand (`btc-trades`) |
 
 Data is not versioned; scripts in `src/btc_radar/` regenerate it.
 
@@ -121,6 +128,21 @@ Wyckoff context.
 
 Takeaway: volume levels are used as context; whether they act as support or
 resistance is left to the backtest rather than assumed.
+
+### Whales & order flow — [`notebooks/03_ballenas.ipynb`](notebooks/03_ballenas.ipynb)
+
+7 days of tick data (15–21 Nov 2026): 9.9M aggregated trades, SHA-256 verified,
+no missing IDs and an exact match with candle volume.
+
+| Finding | Value |
+|---|---|
+| Trades → orders | Re-joining aggTrades that share timestamp and side: 9.9M → 5.1M orders; largest order 6.8M USD sweeping 370 price levels |
+| Concentration | Top 0.1% of orders = 18% of USD volume; top 1% = 45% |
+| Flow by size (price −6%, low 55.1k) | Orders < 1k USD net **sold** (−23% of their volume); orders > 1M USD net **bought** (+7%) — absorption |
+| Predictive power | Whale delta tracks the same-hour return (ρ = 0.31) but not the next hour (ρ = −0.03, p = 0.72) |
+
+Takeaway: big money absorbed retail selling during the drop, but following
+whale flow alone gives no obvious 1-hour edge.
 
 ## Resumen en español
 

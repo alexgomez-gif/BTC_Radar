@@ -143,3 +143,76 @@ def grafico_perfil_volumen(
         showticklabels=False, range=[0, perfil["volumen"].max() * 1.35], row=1, col=2
     )
     return fig
+
+
+def grafico_ballenas(
+    velas: pd.DataFrame,
+    ballenas: pd.DataFrame,
+    cvds: dict[str, pd.Series],
+    titulo: str = "BTCUSDT · órdenes de ballenas",
+) -> go.Figure:
+    """Velas con burbujas de ballenas arriba y curvas de CVD abajo.
+
+    Burbujas: área proporcional al importe en USD; verde = compra agresiva,
+    roja = venta agresiva. `cvds` mapea un nombre (p. ej. "Ballenas") a su CVD.
+    """
+    fig = make_subplots(
+        rows=2,
+        cols=1,
+        shared_xaxes=True,
+        row_heights=[0.7, 0.3],
+        vertical_spacing=0.03,
+    )
+    velas_traza, _ = _trazas_velas(velas)
+    velas_traza.update(opacity=0.6)
+    fig.add_trace(velas_traza, row=1, col=1)
+
+    tamano = 40 * np.sqrt(ballenas["usd"] / ballenas["usd"].max())
+    for compra, color, nombre in [(True, VERDE, "Compra"), (False, ROJO, "Venta")]:
+        lado = ballenas[ballenas["compra_agresiva"] == compra]
+        fig.add_trace(
+            go.Scatter(
+                x=lado["time"],
+                y=lado["precio_medio"],
+                mode="markers",
+                marker={
+                    "size": tamano[lado.index],
+                    "color": color,
+                    "opacity": 0.6,
+                    "line": {"width": 0.5, "color": "white"},
+                },
+                name=f"Ballena · {nombre}",
+                customdata=lado["usd"] / 1e6,
+                hovertemplate="%{y:,.0f} USDT<br>%{customdata:.2f} M USD"
+                "<extra>%{fullData.name}</extra>",
+            ),
+            row=1,
+            col=1,
+        )
+
+    for (nombre, serie), color in zip(
+        cvds.items(), [NARANJA, AZUL, GRIS], strict=False
+    ):
+        fig.add_trace(
+            go.Scatter(
+                x=serie.index,
+                y=serie / 1e6,
+                mode="lines",
+                line={"color": color},
+                name=f"CVD {nombre}",
+            ),
+            row=2,
+            col=1,
+        )
+
+    fig.update_layout(
+        title=titulo,
+        template="plotly_dark",
+        xaxis_rangeslider_visible=False,
+        height=650,
+        margin={"l": 10, "r": 10, "t": 50, "b": 10},
+        legend={"orientation": "h", "y": 1.02, "x": 1, "xanchor": "right"},
+    )
+    fig.update_yaxes(title_text="USDT", row=1, col=1)
+    fig.update_yaxes(title_text="CVD (M USD)", row=2, col=1)
+    return fig

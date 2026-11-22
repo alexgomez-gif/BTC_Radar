@@ -5,6 +5,7 @@ from btc_radar.graficos import (
     NARANJA,
     ROJO,
     VERDE,
+    grafico_ballenas,
     grafico_perfil_volumen,
     grafico_velas,
 )
@@ -47,3 +48,21 @@ def test_grafico_perfil_volumen_marca_poc_y_niveles(df):
     assert any(t.startswith("POC") for t in textos)
     assert any(t.startswith("VAH") for t in textos)
     assert any(t.startswith("VAL") for t in textos)
+
+
+def test_grafico_ballenas_burbujas_por_lado_y_cvd(df):
+    ballenas = pd.DataFrame(
+        {
+            "time": df.index,
+            "precio_medio": [101.0, 98.0],
+            "usd": [4e6, 1e6],
+            "compra_agresiva": [True, False],
+        }
+    )
+    cvd = pd.Series([1e6, -2e6], index=df.index)
+    fig = grafico_ballenas(df, ballenas, {"Ballenas": cvd})
+
+    nombres = [t.name for t in fig.data]
+    assert nombres == ["Precio", "Ballena · Compra", "Ballena · Venta", "CVD Ballenas"]
+    # Área proporcional al importe: la de 4 M mide el doble que la de 1 M
+    assert fig.data[1].marker.size[0] == pytest.approx(2 * fig.data[2].marker.size[0])

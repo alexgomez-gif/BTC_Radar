@@ -10,6 +10,7 @@ requires-python = ">=3.12"
 
 [project.scripts]
 btc-descargar = "btc_radar.binance_client:main"
+btc-trades = "btc_radar.agg_trades:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
