@@ -26,7 +26,7 @@ The project:
 
 - [x] **0. Setup** — repository structure, virtual environment, CI
 - [x] **1. Data** — download BTCUSDT candles (1d, 4h) to Parquet
-- [ ] **2. Exploration** — returns, volatility, volume, first candlestick chart
+- [x] **2. Exploration** — returns, volatility, volume, first candlestick chart
 - [ ] **3. Volume profile** — POC, VAH, VAL
 - [ ] **4. Whales** — large trades, buy/sell aggressor, CVD
 - [ ] **5. Wyckoff v1** — rule-based range and event detection
@@ -96,7 +96,19 @@ Data is not versioned; scripts in `src/btc_radar/` regenerate it.
 
 ## Results
 
-_Coming soon._
+### Exploration — [`notebooks/01_exploracion.ipynb`](notebooks/01_exploracion.ipynb)
+
+| Finding | Value |
+|---|---|
+| Data quality | No nulls or duplicates; 16 missing 4h candles (2018-2020 exchange outages), documented, not imputed |
+| Fat tails | Excess kurtosis ≈ 16; 56 days beyond 3σ vs ≈ 9 expected under normality |
+| Volatility | Annualized 30d vol fell from ~100% (2017) to ~40% (2025-26) |
+| Max drawdown | −83% (Dec 2018) |
+| Aggressive buy ratio | Correlates with same-day return (0.29) but not with next-day return (0.02) |
+
+Takeaway: risk must be measured on real (fat-tailed) data, and order flow is
+descriptive rather than predictive on its own — it will be used within the
+Wyckoff context.
 
 ## Resumen en español
 
