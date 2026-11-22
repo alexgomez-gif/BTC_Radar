@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Bitcoin market analysis: Wyckoff phases, whale volume and backtested entries (Binance API)"
 requires-python = ">=3.12"
 
+[project.scripts]
+btc-descargar = "btc_radar.binance_client:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 

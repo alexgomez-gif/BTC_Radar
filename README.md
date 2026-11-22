@@ -25,7 +25,7 @@ The project:
 ## Roadmap
 
 - [x] **0. Setup** — repository structure, virtual environment, CI
-- [ ] **1. Data** — download BTCUSDT candles (1d, 4h) to Parquet
+- [x] **1. Data** — download BTCUSDT candles (1d, 4h) to Parquet
 - [ ] **2. Exploration** — returns, volatility, volume, first candlestick chart
 - [ ] **3. Volume profile** — POC, VAH, VAL
 - [ ] **4. Whales** — large trades, buy/sell aggressor, CVD
@@ -59,6 +59,22 @@ source .venv/bin/activate
 pip install -r requirements.txt
 pip install -e .
 ```
+
+## Usage
+
+Download BTCUSDT candles (1d and 4h, full history since 2017-08-17) to `data/raw/`:
+
+```bash
+btc-descargar                                  # defaults: BTCUSDT, 1d + 4h
+btc-descargar --intervals 1h --desde 2024-01-01
+```
+
+```python
+import pandas as pd
+df = pd.read_parquet("data/raw/BTCUSDT_1d.parquet")
+```
+
+Only closed candles are stored; the in-progress candle is dropped.
 
 ## Code quality
 
