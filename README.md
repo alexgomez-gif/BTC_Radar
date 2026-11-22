@@ -71,6 +71,7 @@ btc-descargar --intervals 1h --desde 2024-01-01
 
 ```python
 import pandas as pd
+
 df = pd.read_parquet("data/raw/BTCUSDT_1d.parquet")
 ```
 
